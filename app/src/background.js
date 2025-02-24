@@ -95,6 +95,8 @@
       return;
     }
 
+    let realTitle = null;
+
     get(
       "https://www.youtube.com/oembed?url=" + document.location.href,
       function (response) {
@@ -102,7 +104,7 @@
           return;
         }
 
-        const realTitle = JSON.parse(response.responseText).title;
+        realTitle = JSON.parse(response.responseText).title;
 
         if (!realTitle || !translatedTitleElement) {
           // Do nothing if video is not loaded yet
@@ -127,6 +129,7 @@
           `[YoutubeAntiTranslate] translated title to "${realTitle}"`
         );
 
+        document.getElementsByClassName("ytp-title-fullerscreen-link")[0].innerText = realTitle; //Fixes an issue where the fullscreen title does not get changed
         setTitleNode(realTitle, translatedTitleElement);
 
         // translatedTitleElement.textContent = realTitle;
@@ -326,5 +329,17 @@
     observer.observe(target, config);
   }
 
-  run();
+  //Fixes an issue where the title from a previuously watched video replaces the title of the Currently watched video
+  function readyState(func) {
+    if (document.readyState === "complete" || document.readyState === "interactive") {
+        setTimeout(func, 1);
+        return;
+    }
+    document.addEventListener("DOMContentLoaded", func);
+  }
+
+  readyState(function() {
+    console.log("===============================\n     Anti Translate: run()     \n===============================");
+    run();
+  });
 })();
